@@ -1,0 +1,71 @@
+{
+  "New": {
+    "Card": {
+      "Title": "Créer un nouveau sondage",
+      "Description": "Vous n'arrivez pas à vous décider ? Laissez les autres le faire pour vous !"
+    },
+    "Form": {
+      "Title": {
+        "Label": "Titre du vote",
+        "Placeholder": "Entrez le titre du vote"
+      },
+      "Description": {
+        "Label": "Description du vote",
+        "Placeholder": "Entrez la description du vote (optionnel)"
+      },
+      "Options": {
+        "Label": "Options de vote",
+        "Placeholder": "Option {number}",
+        "Add": "Ajouter une option",
+        "Remove": "Supprimer l'option"
+      },
+      "MaxChoices": {
+        "Label": "Nombre maximum de choix"
+      },
+      "Duration": {
+        "Label": "Durée du vote",
+        "Hour": "{number} heure",
+        "Hours": "{number} heures",
+        "Day": "{number} jour",
+        "Days": "{number} jours"
+      },
+      "Submit": "Créer le vote"
+    },
+    "Messages": {
+      "Error": "Erreur lors de la création du sondage",
+      "Success": "Redirection vers le sondage..."
+    }
+  },
+  "Poll": {
+    "Ended": "Terminé",
+    "Voted": "Vote enregistré",
+    "VoteTime": "C'est l'heure de voter !",
+    "VotedMessage": "Vous avez déjà voté pour ce sondage, merci !",
+    "SelectOptions": "Vous pouvez sélectionner jusqu'à <bold>{count}</bold> option{plural}",
+    "Error": "Erreur lors du vote",
+    "Submit": "Soumettre votre vote",
+    "Refresh": "Rafraîchir",
+    "Votes": "{count} votes",
+    "CreatedAt": "Ce sondage a été créé le {date}"
+  },
+  "NotFound": {
+    "Title": "Vous êtes perdu ?",
+    "PollNotFound": "Hmm, nous n'avons pas trouvé le sondage que vous cherchez.",
+    "PageNotFound": "La page que vous cherchez n'existe pas.",
+    "BackHome": "Retourner à l'accueil"
+  },
+  "Error": {
+    "Title": "Une erreur est survenue",
+    "TryAgain": "Réessayer"
+  },
+  "TimeRemaining": {
+    "Hour": "{number} heure",
+    "Hours": "{number} heures",
+    "Day": "{number} jour",
+    "Days": "{number} jours",
+    "Minute": "{number} minute",
+    "Minutes": "{number} minutes",
+    "Second": "{number} seconde",
+    "Seconds": "{number} secondes"
+  }
+}

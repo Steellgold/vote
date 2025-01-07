@@ -1,7 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { PropsWithChildren } from "react";
-import { Component } from "@/lib/types";
-import localFont from "next/font/local";
+import { AsyncComponent } from "@/lib/types";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,9 +9,11 @@ import { ModeToggle } from "@/components/ui/theme-switcher";
 import Link from "next/link";
 import { Github } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { Inter } from "next/font/google";
 
-const geistSans = localFont({ src: "./fonts/GeistVF.woff", variable: "--font-geist-sans", weight: "100 900", });
-const geistMono = localFont({ src: "./fonts/GeistMonoVF.woff", variable: "--font-geist-mono", weight: "100 900", });
+const montserrat = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Polls",
@@ -52,11 +53,14 @@ export const viewport: Viewport = {
   themeColor: "#212121"
 };
 
-const Layout: Component<PropsWithChildren> = ({ children }) => {
+const Layout: AsyncComponent<PropsWithChildren> = async({ children }) => {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={cn(
-        geistSans.variable, geistMono.variable,
+        montserrat.className,
         "antialiased",
         "mt-10"
       )}>
@@ -69,7 +73,9 @@ const Layout: Component<PropsWithChildren> = ({ children }) => {
           <Toaster />
 
           <main className="px-4 py-8">
-            {children}
+            <NextIntlClientProvider messages={messages}>
+              {children}
+            </NextIntlClientProvider>
           </main>
 
           <div className="absolute top-0 right-0 p-4 text-sm space-x-1">

@@ -1,0 +1,71 @@
+{
+  "New": {
+    "Card": {
+      "Title": "Create a new poll",
+      "Description": "Can't make up your mind? Let others do it for you!"
+    },
+    "Form": {
+      "Title": {
+        "Label": "Poll title",
+        "Placeholder": "Enter the poll title"
+      },
+      "Description": {
+        "Label": "Poll description",
+        "Placeholder": "Enter the poll description (optional)"
+      },
+      "Options": {
+        "Label": "Poll options",
+        "Placeholder": "Option {number}",
+        "Add": "Add an option",
+        "Remove": "Remove option"
+      },
+      "MaxChoices": {
+        "Label": "Maximum number of choices"
+      },
+      "Duration": {
+        "Label": "Poll duration",
+        "Hour": "{number} hour",
+        "Hours": "{number} hours",
+        "Day": "{number} day",
+        "Days": "{number} days"
+      },
+      "Submit": "Create poll"
+    },
+    "Messages": {
+      "Error": "Error creating poll",
+      "Success": "Redirecting to poll..."
+    }
+  },
+  "Poll": {
+    "Ended": "Ended",
+    "Voted": "Vote recorded",
+    "VoteTime": "Time to vote!",
+    "VotedMessage": "You have already voted for this poll, thank you!",
+    "SelectOptions": "You can select up to <bold>{count}</bold> option{plural}",
+    "Error": "Error while voting",
+    "Submit": "Submit your vote",
+    "Refresh": "Refresh",
+    "Votes": "{count} votes",
+    "CreatedAt": "This poll was created on {date}"
+  },
+  "NotFound": {
+    "Title": "You're lost?",
+    "PollNotFound": "Hmm, we couldn't find the poll you're looking for.",
+    "PageNotFound": "The page you are looking for does not exist.",
+    "BackHome": "Go back home"
+  },
+  "Error": {
+    "Title": "An error occurred",
+    "TryAgain": "Try again"
+  },
+  "TimeRemaining": {
+    "Hour": "{number} hour",
+    "Hours": "{number} hours",
+    "Day": "{number} day",
+    "Days": "{number} days",
+    "Minute": "{number} minute",
+    "Minutes": "{number} minutes",
+    "Second": "{number} second",
+    "Seconds": "{number} seconds"
+  }
+}
