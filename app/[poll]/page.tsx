@@ -4,13 +4,13 @@ import NotFound from "../not-found"
 import { AsyncComponent } from "@/lib/types"
 
 type PageProps = {
-  params: {
+  params: Promise<{
     poll: string
-  }
+  }>
 }
 
 const Page: AsyncComponent<PageProps> = async ({ params }) => {
-  const pollId = params.poll;
+  const pollId = (await params).poll;
 
   const poll = await prisma.poll.findFirst({
     where: {
