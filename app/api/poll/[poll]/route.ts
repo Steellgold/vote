@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-type Params = {
-  params: { 
-    pollId: string 
-  }
-}
-
 export const GET = async (
   req: NextRequest,
   { params }: { params: Promise<{ poll: string }> }

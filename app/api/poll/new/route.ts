@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { nanoid } from "nanoid"
 
-export const voteSchema = z.object({
+const voteSchema = z.object({
   question: z.string().min(1),
   description: z.string().nullable(),
   max_votes: z.number().min(1).max(5),
