@@ -4,17 +4,15 @@ import { Component } from "@/lib/types";
 import localFont from "next/font/local";
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import { ModeToggle } from "@/components/ui/theme-switcher";
+import Link from "next/link";
+import { Github } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const geistSans = localFont({ src: "./fonts/GeistVF.woff", variable: "--font-geist-sans", weight: "100 900", });
+const geistMono = localFont({ src: "./fonts/GeistMonoVF.woff", variable: "--font-geist-mono", weight: "100 900", });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,16 +22,27 @@ export const metadata: Metadata = {
 const Layout: Component<PropsWithChildren> = ({ children }) => {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={cn(
+        geistSans.variable, geistMono.variable,
+        "antialiased",
+        "mt-10"
+      )}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster />
+
           {children}
+
+          <div className="absolute top-0 right-0 p-4 text-sm space-x-1">
+            <Link href="https://github.com/Steellgold/vote" className={buttonVariants({ variant: "outline", size: "icon" })}>
+              <Github size={24} />
+            </Link>
+            <ModeToggle />
+          </div>
         </ThemeProvider>
       </body>
     </html>
