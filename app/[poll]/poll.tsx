@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Check, CircleCheckBigIcon, Loader2 } from "lucide-react"
+import { Check, CircleCheckBigIcon, Loader2, RefreshCcw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Component } from "@/lib/types"
 import { dayJS } from "@/lib/day-js"
@@ -69,6 +69,16 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   }
 
   const handleVoteSubmit = async () => {
+    if (
+      selectedOptions.length === 0 ||
+      isPending ||
+      isLoading ||
+      hasVoted
+    ) {
+      console.log("Can't vote yet")
+      return
+    }
+
     if (selectedOptions.length === 0) {
       toast.error("Sélectionnez au moins une option")
       return
@@ -161,17 +171,30 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
         ))}
       </CardContent>
 
-      {!hasVoted && !isVoteEnded && (
-        <CardFooter>
-          <Button
-            onClick={handleVoteSubmit} 
-            disabled={isPending || selectedOptions.length === 0 || isLoading}
-            className="w-full"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Soumettre votre vote"}
-          </Button>
-        </CardFooter>
-      )}
+      <CardFooter className="flex justify-end space-x-1">
+        <Button
+          onClick={() => router.refresh()}
+          variant={"default"}
+          size={"sm"}
+        >
+          <RefreshCcw />
+          Rafraîchir
+        </Button>
+
+        <Button
+          onClick={handleVoteSubmit} 
+          disabled={
+            isPending ||
+            selectedOptions.length === 0 ||
+            isLoading ||
+            hasVoted ||
+            isVoteEnded
+          }
+          size={"sm"}
+        >
+          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Soumettre votre vote"}
+        </Button>
+      </CardFooter>
     </Card>
   )
 }
