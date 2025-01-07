@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
+import { Check } from "lucide-react"
 
 type Option = {
   id: string
@@ -85,9 +86,9 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
         {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
         <CardDescription>
           {hasVoted ? (
-            "Vous avez déjà voté"
+            "Vous avez déjà voté pour ce sondage, merci !"
           ) : (
-            `Vous pouvez sélectionner jusqu'à ${initialPoll.maxVotes} option${initialPoll.maxVotes > 1 ? 's' : ''}`
+            `Vous pouvez sélectionner jusqu'à ${initialPoll.maxVotes} option${initialPoll.maxVotes > 1 ? "s" : ""}`
           )}
         </CardDescription>
       </CardHeader>
@@ -103,13 +104,18 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
               "flex justify-between items-center",
               {
                 "opacity-50 cursor-not-allowed": hasVoted,
-                "border-2 border-primary": isOptionSelected(option.optionId)
               }
             )}
             key={option.optionId}
           >
-            <p>{option.text}</p>
-            <span className="text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2">
+              {isOptionSelected(option.optionId) && (
+                <Check className="w-4 h-4 text-primary-500" />
+              )}
+
+              <p>{option.text}</p>
+            </div>
+            <span className="text-sm text-muted-foreground select-none">
               {option._count.votes} votes
             </span>
           </div>

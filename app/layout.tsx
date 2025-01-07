@@ -35,7 +35,9 @@ const Layout: Component<PropsWithChildren> = ({ children }) => {
         >
           <Toaster />
 
-          {children}
+          <main className="px-4 py-8">
+            {children}
+          </main>
 
           <div className="absolute top-0 right-0 p-4 text-sm space-x-1">
             <Link href="https://github.com/Steellgold/vote" className={buttonVariants({ variant: "outline", size: "icon" })}>

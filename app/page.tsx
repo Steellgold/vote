@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PlusCircle, Trash2 } from 'lucide-react'
+import { PlusCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { calculateEndDate, dayJS } from "@/lib/day-js"
+import { calculateEndDate } from "@/lib/day-js"
 
 const NewVote = () => {
   const [title, setTitle] = useState("")
