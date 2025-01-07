@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Check } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 type Option = {
   id: string
@@ -29,6 +30,9 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
   const [isPending, startTransition] = useTransition()
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [hasVoted, setHasVoted] = useState(false)
+
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const voted = localStorage.getItem(`poll_${initialPoll.pollId}`)
@@ -59,21 +63,26 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
       return
     }
 
-    startTransition(async () => {
-      const response = await fetch(`/api/poll/${initialPoll.pollId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ optionIds: selectedOptions })
-      })
+    setIsLoading(true)
 
-      if (!response.ok) {
-        toast.error("Erreur lors du vote")
-        return
-      }
+    startTransition(() => {
+      (async () => {
+        const response = await fetch(`/api/poll/${initialPoll.pollId}/vote`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ optionIds: selectedOptions })
+        })
 
-      localStorage.setItem(`poll_${initialPoll.pollId}`, "true")
-      setHasVoted(true)
-      toast.success("Vote enregistré !")
+        if (!response.ok) {
+          toast.error("Erreur lors du vote")
+          return
+        }
+
+        localStorage.setItem(`poll_${initialPoll.pollId}`, "true")
+        setHasVoted(true)
+        router.refresh()
+        setIsLoading(false)
+      })()
     })
   }
 
@@ -109,10 +118,7 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
             key={option.optionId}
           >
             <div className="flex items-center space-x-2">
-              {isOptionSelected(option.optionId) && (
-                <Check className="w-4 h-4 text-primary-500" />
-              )}
-
+              {isOptionSelected(option.optionId) && <Check className="w-4 h-4 text-primary-500" />}
               <p>{option.text}</p>
             </div>
             <span className="text-sm text-muted-foreground select-none">
@@ -124,12 +130,12 @@ export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
 
       {!hasVoted && (
         <CardFooter>
-          <Button 
+          <Button
             onClick={handleVoteSubmit} 
-            disabled={isPending || selectedOptions.length === 0}
+            disabled={isPending || selectedOptions.length === 0 || isLoading}
             className="w-full"
           >
-            Voter
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Soumettre votre vote"}
           </Button>
         </CardFooter>
       )}

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 const Layout: Component<PropsWithChildren> = ({ children }) => {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={cn(
         geistSans.variable, geistMono.variable,
         "antialiased",

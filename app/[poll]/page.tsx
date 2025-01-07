@@ -6,9 +6,11 @@ import NotFound from "../not-found"
 const Page: AsyncComponent<{
   params: { poll: string }
 }> = async ({ params }) => {
+  const pollId = (await params).poll;
+
   const poll = await prisma.poll.findFirst({
     where: {
-      pollId: params.poll
+      pollId: pollId
     },
     include: {
       options: {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PlusCircle, Trash2 } from "lucide-react"
+import { Loader2, PlusCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { calculateEndDate } from "@/lib/day-js"
+import { useRouter } from "next/navigation"
 
 const NewVote = () => {
   const [title, setTitle] = useState("")
@@ -18,13 +19,12 @@ const NewVote = () => {
   const [maxChoices, setMaxChoices] = useState("1")
   const [duration, setDuration] = useState("1")
 
-  const addOption = () => {
-    setOptions([...options, ""])
-  }
+  const [isLoading, setIsLoading] = useState(false)
 
-  const removeOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index))
-  }
+  const router = useRouter();
+
+  const addOption = () => setOptions([...options, ""])
+  const removeOption = (index: number) => setOptions(options.filter((_, i) => i !== index))
 
   const updateOption = (index: number, value: string) => {
     const newOptions = [...options]
@@ -34,6 +34,7 @@ const NewVote = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsLoading(true)
   
     const response = await fetch("/api/poll/new", {
       method: "POST",
@@ -48,11 +49,13 @@ const NewVote = () => {
     })
   
     if (!response.ok) {
-      toast.error("Erreur lors de la création du vote")
+      setIsLoading(false)
+      toast.error("Error creating poll")
       return
     }
-    
-    console.log("Vote créé avec succès", await response.json())
+
+    toast.success("Redirection vers le sondage...")
+    router.push(`/${(await response.json()).pollId}`)
   }
 
   return (
@@ -70,6 +73,7 @@ const NewVote = () => {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Entrez le titre du vote"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -80,6 +84,7 @@ const NewVote = () => {
               placeholder="Entrez la description du vote (optionnel)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -92,6 +97,7 @@ const NewVote = () => {
                   onChange={(e) => updateOption(index, e.target.value)}
                   placeholder={`Option ${index + 1}`}
                   required
+                  disabled={isLoading}
                 />
                 {options.length > 2 && (
                   <Button
@@ -99,13 +105,14 @@ const NewVote = () => {
                     variant="outline"
                     size="icon"
                     onClick={() => removeOption(index)}
+                    disabled={isLoading}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={addOption} className="mt-2">
+            <Button type="button" variant="outline" onClick={addOption} className="mt-2" disabled={isLoading}>
               <PlusCircle className="h-4 w-4 mr-2" />
               Ajouter une option
             </Button>
@@ -114,7 +121,7 @@ const NewVote = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label htmlFor="maxChoices">Nombre maximum de choix</Label>
-              <Select value={maxChoices} onValueChange={setMaxChoices}>
+              <Select value={maxChoices} onValueChange={setMaxChoices} disabled={isLoading}>
                 <SelectTrigger id="maxChoices">
                   <SelectValue placeholder="Sélectionnez le max" />
                 </SelectTrigger>
@@ -130,7 +137,7 @@ const NewVote = () => {
 
             <div className="space-y-1">
               <Label htmlFor="duration">Durée du vote (en jours)<span className="text-red-500">*</span></Label>
-              <Select value={duration} onValueChange={setDuration}>
+              <Select value={duration} onValueChange={setDuration} disabled={isLoading}>
                 <SelectTrigger id="duration">
                   <SelectValue placeholder="Sélectionnez la durée" />
                 </SelectTrigger>
@@ -150,10 +157,12 @@ const NewVote = () => {
         </form>
       </CardContent>
       <CardFooter>
-        {/* @ts-ignore */}
-        <Button type="submit" className="w-full" onClick={handleSubmit}>
-          Créer le vote
-        </Button>
+        <form onSubmit={handleSubmit} className="w-full">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+            Créer le vote
+          </Button>
+        </form>
       </CardFooter>
     </Card>
   )
