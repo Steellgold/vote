@@ -11,7 +11,7 @@ export const voteSchema = z.object({
   options: z.array(z.string().min(1)).min(2)
 })
 
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const body = await req.json()
     const validatedData = voteSchema.parse(body)

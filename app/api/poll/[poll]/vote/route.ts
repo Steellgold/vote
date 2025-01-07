@@ -8,7 +8,7 @@ type Params = {
   }
 }
 
-export const POST = async (req: NextRequest, { params }: Params) => {
+export const POST = async (req: NextRequest, { params }: Params): Promise<NextResponse> => {
   try {
     const { optionIds } = await req.json()
     
