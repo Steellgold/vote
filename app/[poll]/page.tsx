@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma"
 import { PollPage } from "./poll"
-import { AsyncComponent } from "@/lib/types"
 import NotFound from "../not-found"
+import { AsyncComponent } from "@/lib/types"
 
-const Page: AsyncComponent<{
-  params: { poll: string }
-}> = async ({ params }) => {
-  const pollId = (await params).poll;
+type PageProps = {
+  params: {
+    poll: string
+  }
+}
+
+const Page: AsyncComponent<PageProps> = async ({ params }) => {
+  const pollId = params.poll;
 
   const poll = await prisma.poll.findFirst({
     where: {

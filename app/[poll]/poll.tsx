@@ -7,6 +7,7 @@ import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Check, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Component } from "@/lib/types"
 
 type Option = {
   id: string
@@ -26,7 +27,7 @@ type Poll = {
   options: Option[]
 }
 
-export const PollPage = ({ poll: initialPoll }: { poll: Poll }) => {
+export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   const [isPending, startTransition] = useTransition()
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [hasVoted, setHasVoted] = useState(false)
