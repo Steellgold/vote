@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Check, Loader2 } from "lucide-react"
+import { Check, CircleCheckBigIcon, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Component } from "@/lib/types"
+import { dayJS } from "@/lib/day-js"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 
 type Option = {
   id: string
@@ -25,19 +28,26 @@ type Poll = {
   description?: string | null
   maxVotes: number
   options: Option[]
+  endAt?: Date | null
 }
 
 export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   const [isPending, startTransition] = useTransition()
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
+  const [votedOptions, setVotedOptions] = useState<string[]>([])
   const [hasVoted, setHasVoted] = useState(false)
-
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const voted = localStorage.getItem(`poll_${initialPoll.pollId}`)
-    if (voted) setHasVoted(true)
+    if (voted) {
+      setHasVoted(true)
+      const savedVotes = localStorage.getItem(`poll_${initialPoll.pollId}_options`)
+      if (savedVotes) {
+        setVotedOptions(JSON.parse(savedVotes))
+      }
+    }
   }, [initialPoll.pollId])
 
   const handleOptionSelect = (optionId: string) => {
@@ -80,6 +90,8 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
         }
 
         localStorage.setItem(`poll_${initialPoll.pollId}`, "true")
+        localStorage.setItem(`poll_${initialPoll.pollId}_options`, JSON.stringify(selectedOptions))
+        setVotedOptions(selectedOptions)
         setHasVoted(true)
         router.refresh()
         setIsLoading(false)
@@ -88,19 +100,36 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   }
 
   const isOptionSelected = (optionId: string) => selectedOptions.includes(optionId)
+  const hasVotedForOption = (optionId: string) => votedOptions.includes(optionId)
+  const isVoteEnded = dayJS(initialPoll.endAt).isBefore(dayJS())
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{initialPoll.question}</CardTitle>
-        {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
-        <CardDescription>
-          {hasVoted ? (
-            "Vous avez déjà voté pour ce sondage, merci !"
-          ) : (
-            `Vous pouvez sélectionner jusqu'à ${initialPoll.maxVotes} option${initialPoll.maxVotes > 1 ? "s" : ""}`
+        <CardTitle className="flex items-center space-x-2">
+          {initialPoll.question}
+          {isVoteEnded && (
+            <Badge variant="destructive" className="ml-2">
+              Terminé
+            </Badge>
           )}
-        </CardDescription>
+        </CardTitle>
+
+        {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
+
+        {initialPoll.description && <div className="my-3" />}
+
+        <Alert>
+          {hasVoted && <CircleCheckBigIcon className="h-4 w-4" />}
+
+          <AlertTitle>{hasVoted ? "Vote enregistré" : "C'est l'heure de voter !"}</AlertTitle>
+          <AlertDescription>
+            {hasVoted
+              ? "Vous avez déjà voté pour ce sondage, merci !"
+              : <>Vous pouvez sélectionner jusqu'à <span className="font-bold">{initialPoll.maxVotes}</span> option{initialPoll.maxVotes > 1 ? "s" : ""}</>
+            }
+          </AlertDescription>
+        </Alert>
       </CardHeader>
 
       <CardContent className="space-y-2">
@@ -119,7 +148,10 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
             key={option.optionId}
           >
             <div className="flex items-center space-x-2">
-              {isOptionSelected(option.optionId) && <Check className="w-4 h-4 text-primary-500" />}
+              {(
+                isOptionSelected(option.optionId)
+                || (hasVoted && hasVotedForOption(option.optionId))
+              ) && <Check className="w-4 h-4 text-primary" />}
               <p>{option.text}</p>
             </div>
             <span className="text-sm text-muted-foreground select-none">
@@ -129,7 +161,7 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
         ))}
       </CardContent>
 
-      {!hasVoted && (
+      {!hasVoted && !isVoteEnded && (
         <CardFooter>
           <Button
             onClick={handleVoteSubmit} 
