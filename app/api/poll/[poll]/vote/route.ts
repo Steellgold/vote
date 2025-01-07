@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { nanoid } from "nanoid"
+import { dayJS } from "@/lib/day-js"
 
 export const POST = async (
   req: NextRequest,
@@ -18,6 +19,10 @@ export const POST = async (
 
     if (!poll) {
       return NextResponse.json({ error: "Poll not found" }, { status: 404 })
+    }
+
+    if (dayJS(poll.endAt).isBefore(dayJS())) {
+      return NextResponse.json({ error: "Poll has ended" }, { status: 400 })
     }
 
     if (optionIds.length > poll.maxVotes) {
