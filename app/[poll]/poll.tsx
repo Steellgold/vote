@@ -13,26 +13,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useLocale, useTranslations } from "next-intl"
 import { TimeRemaining } from "@/components/time-remaining"
-
-type Option = {
-  id: string;
-  optionId: string;
-  text: string;
-  _count: {
-    votes: number;
-  }
-}
-
-type Poll = {
-  id: string;
-  pollId: string;
-  question: string;
-  description?: string | null;
-  maxVotes: number;
-  options: Option[];
-  createdAt: Date;
-  endAt?: Date | null;
-}
+import { Poll } from "@/lib/types/poll"
+import { PollResults } from "./result"
 
 export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   const [isPending, startTransition] = useTransition()
@@ -133,105 +115,109 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   const isVoteEnded = dayJS(initialPoll.endAt).isBefore(dayJS())
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        
-        <CardTitle className="flex items-col sm:items-center justify-between">
-          {initialPoll.question}
-        </CardTitle>
+    <>
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          
+          <CardTitle className="flex items-col sm:items-center justify-between">
+            {initialPoll.question}
+          </CardTitle>
 
-        <span className="text-sm text-gray-500">
-          {t("CreatedAt", {date: getFormattedDate(initialPoll.createdAt) })}
-        </span>
+          <span className="text-sm text-gray-500">
+            {t("CreatedAt", {date: getFormattedDate(initialPoll.createdAt) })}
+          </span>
 
-        {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
+          {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
 
-        {initialPoll.description && <div className="my-3" />}
+          {initialPoll.description && <div className="my-3" />}
 
-        <Alert>
-          {hasVoted ? <CircleCheckBigIcon className="h-4 w-4" /> : <Vote className="h-4 w-4" />}
+          <Alert>
+            {hasVoted ? <CircleCheckBigIcon className="h-4 w-4" /> : <Vote className="h-4 w-4" />}
 
-          <AlertTitle>{hasVoted ? t("Voted") : t("VoteTime")}</AlertTitle>
-          <AlertDescription>
-            {hasVoted 
-              ? t("VotedMessage")
-              : t.rich("SelectOptions", {
-                  count: initialPoll.maxVotes,
-                  plural: initialPoll.maxVotes > 1 ? "s" : "",
-                  bold: (chunks) => <span className="font-bold">{chunks}</span>
-                })
-            }
-          </AlertDescription>
-        </Alert>
-      </CardHeader>
+            <AlertTitle>{hasVoted ? t("Voted") : t("VoteTime")}</AlertTitle>
+            <AlertDescription>
+              {hasVoted 
+                ? t("VotedMessage")
+                : t.rich("SelectOptions", {
+                    count: initialPoll.maxVotes,
+                    plural: initialPoll.maxVotes > 1 ? "s" : "",
+                    bold: (chunks) => <span className="font-bold">{chunks}</span>
+                  })
+              }
+            </AlertDescription>
+          </Alert>
+        </CardHeader>
 
-      <CardContent className="space-y-2">
-        {initialPoll.options.map((option) => (
-          <div onClick={() => handleOptionSelect(option.optionId)} className={cn(
-            "bg-neutral-200/40 dark:bg-neutral-800/30",
-            "hover:bg-neutral-200 dark:hover:bg-neutral-800",
-            "rounded-lg p-4 cursor-pointer transition-colors",
-            "flex justify-between items-center", {
-              "opacity-50 cursor-not-allowed": hasVoted,
-            }
-          )} key={option.optionId}>
-            <div className="flex items-center space-x-2">
-              {(
-                isOptionSelected(option.optionId)
-                ||
-                (hasVoted && hasVotedForOption(option.optionId))
-              ) && <Check className="w-4 h-4 text-primary" />}
-              <span className="text-sm">{option.text}</span>
+        <CardContent className="space-y-2">
+          {initialPoll.options.map((option) => (
+            <div onClick={() => handleOptionSelect(option.optionId)} className={cn(
+              "bg-neutral-200/40 dark:bg-neutral-800/30",
+              "hover:bg-neutral-200 dark:hover:bg-neutral-800",
+              "rounded-lg p-4 cursor-pointer transition-colors",
+              "flex justify-between items-center", {
+                "opacity-50 cursor-not-allowed": hasVoted,
+              }
+            )} key={option.optionId}>
+              <div className="flex items-center space-x-2">
+                {(
+                  isOptionSelected(option.optionId)
+                  ||
+                  (hasVoted && hasVotedForOption(option.optionId))
+                ) && <Check className="w-4 h-4 text-primary" />}
+                <span className="text-sm">{option.text}</span>
+              </div>
+              <span className="text-sm text-muted-foreground select-none">
+                {t("Votes", { count: option._count.votes })}
+              </span>
             </div>
-            <span className="text-sm text-muted-foreground select-none">
-              {t("Votes", { count: option._count.votes })}
-            </span>
+          ))}
+        </CardContent>
+
+        <CardFooter className={cn(
+          "space-y-2",
+          "flex flex-col sm:flex-row items-center justify-between",
+        )}>
+          {isVoteEnded ? (
+            <Badge variant="destructive">
+              {t("Ended")}
+            </Badge>
+          ) : (
+            <Badge variant="default" className="space-x-2">
+              <Clock className="w-3 h-3" />
+              <TimeRemaining targetDate={dayJS(initialPoll.endAt)} />
+            </Badge>
+          )}
+
+          <div className="flex w-full sm:w-auto space-x-2">
+            <Button
+              onClick={() => router.refresh()}
+              variant="default"
+              size="sm"
+              className="w-full"
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              {t("Refresh")}
+            </Button>
+
+            <Button
+              onClick={handleVoteSubmit} 
+              disabled={
+                isPending ||
+                selectedOptions.length === 0 ||
+                isLoading ||
+                hasVoted ||
+                isVoteEnded
+              }
+              size="sm"
+              className="w-full"
+            >
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("Submit")}
+            </Button>
           </div>
-        ))}
-      </CardContent>
+        </CardFooter>
+      </Card>
 
-      <CardFooter className={cn(
-        "space-y-2",
-        "flex flex-col sm:flex-row items-center justify-between",
-      )}>
-        {isVoteEnded ? (
-          <Badge variant="destructive">
-            {t("Ended")}
-          </Badge>
-        ) : (
-          <Badge variant="default" className="space-x-2">
-            <Clock className="w-3 h-3" />
-            <TimeRemaining targetDate={dayJS(initialPoll.endAt)} />
-          </Badge>
-        )}
-
-        <div className="flex w-full sm:w-auto space-x-2">
-          <Button
-            onClick={() => router.refresh()}
-            variant="default"
-            size="sm"
-            className="w-full"
-          >
-            <RefreshCcw className="w-4 h-4 mr-2" />
-            {t("Refresh")}
-          </Button>
-
-          <Button
-            onClick={handleVoteSubmit} 
-            disabled={
-              isPending ||
-              selectedOptions.length === 0 ||
-              isLoading ||
-              hasVoted ||
-              isVoteEnded
-            }
-            size="sm"
-            className="w-full"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("Submit")}
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+      <PollResults hasVoted={hasVoted} options={initialPoll.options} question={initialPoll.question} />
+    </>
   )
 }
