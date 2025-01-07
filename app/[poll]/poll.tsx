@@ -217,7 +217,12 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
         </CardFooter>
       </Card>
 
-      <PollResults hasVoted={hasVoted} options={initialPoll.options} question={initialPoll.question} />
+      <PollResults
+        hasVoted={hasVoted}
+        options={initialPoll.options}
+        question={initialPoll.question}
+        perVote={initialPoll.maxVotes}
+      />
     </>
   )
 }

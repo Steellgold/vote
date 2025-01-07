@@ -5,10 +5,15 @@ import { PieChart, Pie, Label, Cell } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card"
 import { Component } from "@/lib/types"
 import { Option } from "@/lib/types/poll"
-import { COLORS } from "@/lib/utils";
+import { cn, COLORS } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-export const PollResults: Component<{ options: Option[]; question: string; hasVoted: boolean }> = ({ options, question, hasVoted }) => {
+export const PollResults: Component<{
+  options: Option[];
+  question: string;
+  hasVoted: boolean;
+  perVote: number;
+}> = ({ options, question, hasVoted, perVote = 1 }) => {
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   const t = useTranslations("Poll");
 
@@ -48,7 +53,7 @@ export const PollResults: Component<{ options: Option[]; question: string; hasVo
               innerRadius={60}
               outerRadius={80}
               strokeWidth={2}
-              onClick={handleClick}
+              onClick={(_, index) => handleClick(index)}
               isAnimationActive={true}
               animationDuration={300}
             >
@@ -70,7 +75,9 @@ export const PollResults: Component<{ options: Option[]; question: string; hasVo
                           textAnchor="middle"
                           dominantBaseline="middle"
                         >
-                          <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-2xl font-bold">{totalVotes}</tspan>
+                          <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-2xl font-bold">
+                            {perVote === 1 ? totalVotes : totalVotes / perVote}
+                          </tspan>
                           <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 20} className="fill-muted-foreground text-sm">votes</tspan>
                         </text>
                       )
@@ -87,9 +94,12 @@ export const PollResults: Component<{ options: Option[]; question: string; hasVo
           {chartData.map((item, index) => (
             <div 
               key={index} 
-              className={`flex items-center gap-2 p-2 rounded transition-colors ${
-                selectedSegment === index ? "bg-neutral-200/50 dark:bg-neutral-800/30" : "hover:bg-neutral-200/55 dark:hover:bg-neutral-800/35"
-              }`}
+              className={cn(
+                "flex items-center gap-2 p-2 rounded transition-colors",
+                "hover:bg-neutral-200 dark:hover:bg-neutral-800", {
+                  "bg-neutral-200/50 dark:bg-neutral-800/30": selectedSegment === index
+                }
+              )}
               onClick={() => handleClick(index)}
               style={{ cursor: "pointer" }}
             >
