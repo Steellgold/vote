@@ -46,7 +46,8 @@
     "Submit": "Soumettre votre vote",
     "Refresh": "Rafraîchir",
     "Votes": "{count} votes",
-    "CreatedAt": "Ce sondage a été créé le {date}"
+    "CreatedAt": "Ce sondage a été créé le {date}",
+    "PieResults": "Résultats du sondage"
   },
   "NotFound": {
     "Title": "Vous êtes perdu ?",
