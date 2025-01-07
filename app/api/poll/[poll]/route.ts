@@ -7,7 +7,7 @@ type Params = {
   }
 }
 
-const GET = async (req: NextRequest, { params }: Params) => {
+export const GET = async (req: NextRequest, { params }: Params) => {
   try {
     const poll = await prisma.poll.findFirst({
       where: {
@@ -34,5 +34,3 @@ const GET = async (req: NextRequest, { params }: Params) => {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-
-export default { GET }

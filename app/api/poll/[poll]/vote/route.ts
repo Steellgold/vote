@@ -8,7 +8,7 @@ type Params = {
   }
 }
 
-const POST = async (req: NextRequest, { params }: Params) => {
+export const POST = async (req: NextRequest, { params }: Params) => {
   try {
     const { optionIds } = await req.json()
     
@@ -50,5 +50,3 @@ const POST = async (req: NextRequest, { params }: Params) => {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-
-export { POST }
