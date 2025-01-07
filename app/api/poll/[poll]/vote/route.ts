@@ -2,18 +2,17 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { nanoid } from "nanoid"
 
-type Params = {
-  params: { 
-    pollId: string 
-  }
-}
+export const POST = async (
+  req: NextRequest,
+  { params }: { params: Promise<{ poll: string }> }
+): Promise<NextResponse> => {
+  const pollId = (await params).poll
 
-export const POST = async (req: NextRequest, { params }: Params): Promise<NextResponse> => {
   try {
     const { optionIds } = await req.json()
     
     const poll = await prisma.poll.findFirst({
-      where: { pollId: params.pollId },
+      where: { pollId: pollId },
       include: { options: true }
     })
 

@@ -7,11 +7,16 @@ type Params = {
   }
 }
 
-export const GET = async ({ params }: Params): Promise<NextResponse> => {
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: Promise<{ poll: string }> }
+): Promise<NextResponse> => {
+  const pollId = (await params).poll
+
   try {
     const poll = await prisma.poll.findFirst({
       where: {
-        pollId: params.pollId
+        pollId: pollId
       },
       include: {
         options: {
