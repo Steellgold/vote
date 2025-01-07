@@ -5,30 +5,33 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTransition, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Check, CircleCheckBigIcon, Loader2, RefreshCcw } from "lucide-react"
+import { Check, CircleCheckBigIcon, Clock, Loader2, RefreshCcw, Vote } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Component } from "@/lib/types"
 import { dayJS } from "@/lib/day-js"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { useLocale, useTranslations } from "next-intl"
+import { TimeRemaining } from "@/components/time-remaining"
 
 type Option = {
-  id: string
-  optionId: string
-  text: string
+  id: string;
+  optionId: string;
+  text: string;
   _count: {
-    votes: number
+    votes: number;
   }
 }
 
 type Poll = {
-  id: string
-  pollId: string
-  question: string
-  description?: string | null
-  maxVotes: number
-  options: Option[]
-  endAt?: Date | null
+  id: string;
+  pollId: string;
+  question: string;
+  description?: string | null;
+  maxVotes: number;
+  options: Option[];
+  createdAt: Date;
+  endAt?: Date | null;
 }
 
 export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
@@ -38,6 +41,10 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   const [hasVoted, setHasVoted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  const locale = useLocale();
+
+  const t = useTranslations("Poll")
 
   useEffect(() => {
     const voted = localStorage.getItem(`poll_${initialPoll.pollId}`)
@@ -75,12 +82,12 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
       isLoading ||
       hasVoted
     ) {
-      console.log("Can't vote yet")
+      console.log("Can\"t vote yet")
       return
     }
 
     if (selectedOptions.length === 0) {
-      toast.error("Sélectionnez au moins une option")
+      toast.error(t("Error"))
       return
     }
 
@@ -95,7 +102,7 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
         })
 
         if (!response.ok) {
-          toast.error("Erreur lors du vote")
+          toast.error(t("Error"))
           return
         }
 
@@ -108,6 +115,18 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
       })()
     })
   }
+  
+  const getFormattedDate = (date: Date) => {
+    if (locale === "fr") {
+      const formattedDate = dayJS(date).locale("fr").format("D MMMM YYYY [à] HH:mm");
+
+      const [day, month, ...rest] = formattedDate.split(" ");
+      const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+      return [day, capitalizedMonth, ...rest].join(" ");
+    }
+    
+    return dayJS(date).locale("en").format("MMMM D, YYYY [at] h:mm A");
+  };
 
   const isOptionSelected = (optionId: string) => selectedOptions.includes(optionId)
   const hasVotedForOption = (optionId: string) => votedOptions.includes(optionId)
@@ -116,27 +135,31 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+        
+        <CardTitle className="flex items-col sm:items-center justify-between">
           {initialPoll.question}
-          {isVoteEnded && (
-            <Badge variant="destructive" className="ml-2">
-              Terminé
-            </Badge>
-          )}
         </CardTitle>
+
+        <span className="text-sm text-gray-500">
+          {t("CreatedAt", {date: getFormattedDate(initialPoll.createdAt) })}
+        </span>
 
         {initialPoll.description && <CardDescription>{initialPoll.description}</CardDescription>}
 
         {initialPoll.description && <div className="my-3" />}
 
         <Alert>
-          {hasVoted && <CircleCheckBigIcon className="h-4 w-4" />}
+          {hasVoted ? <CircleCheckBigIcon className="h-4 w-4" /> : <Vote className="h-4 w-4" />}
 
-          <AlertTitle>{hasVoted ? "Vote enregistré" : "C'est l'heure de voter !"}</AlertTitle>
+          <AlertTitle>{hasVoted ? t("Voted") : t("VoteTime")}</AlertTitle>
           <AlertDescription>
-            {hasVoted
-              ? "Vous avez déjà voté pour ce sondage, merci !"
-              : <>Vous pouvez sélectionner jusqu'à <span className="font-bold">{initialPoll.maxVotes}</span> option{initialPoll.maxVotes > 1 ? "s" : ""}</>
+            {hasVoted 
+              ? t("VotedMessage")
+              : t.rich("SelectOptions", {
+                  count: initialPoll.maxVotes,
+                  plural: initialPoll.maxVotes > 1 ? "s" : "",
+                  bold: (chunks) => <span className="font-bold">{chunks}</span>
+                })
             }
           </AlertDescription>
         </Alert>
@@ -144,56 +167,70 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
 
       <CardContent className="space-y-2">
         {initialPoll.options.map((option) => (
-          <div
-            onClick={() => handleOptionSelect(option.optionId)}
-            className={cn(
-              "bg-neutral-200/40 dark:bg-neutral-800/30",
-              "hover:bg-neutral-200 dark:hover:bg-neutral-800",
-              "rounded-lg p-4 cursor-pointer transition-colors",
-              "flex justify-between items-center",
-              {
-                "opacity-50 cursor-not-allowed": hasVoted,
-              }
-            )}
-            key={option.optionId}
-          >
+          <div onClick={() => handleOptionSelect(option.optionId)} className={cn(
+            "bg-neutral-200/40 dark:bg-neutral-800/30",
+            "hover:bg-neutral-200 dark:hover:bg-neutral-800",
+            "rounded-lg p-4 cursor-pointer transition-colors",
+            "flex justify-between items-center", {
+              "opacity-50 cursor-not-allowed": hasVoted,
+            }
+          )} key={option.optionId}>
             <div className="flex items-center space-x-2">
               {(
                 isOptionSelected(option.optionId)
-                || (hasVoted && hasVotedForOption(option.optionId))
+                ||
+                (hasVoted && hasVotedForOption(option.optionId))
               ) && <Check className="w-4 h-4 text-primary" />}
-              <p>{option.text}</p>
+              <span className="text-sm">{option.text}</span>
             </div>
             <span className="text-sm text-muted-foreground select-none">
-              {option._count.votes} votes
+              {t("Votes", { count: option._count.votes })}
             </span>
           </div>
         ))}
       </CardContent>
 
-      <CardFooter className="flex justify-end space-x-1">
-        <Button
-          onClick={() => router.refresh()}
-          variant={"default"}
-          size={"sm"}
-        >
-          <RefreshCcw />
-          Rafraîchir
-        </Button>
+      <CardFooter className={cn(
+        "space-y-2",
+        "flex flex-col sm:flex-row items-center justify-between",
+      )}>
+        {isVoteEnded ? (
+          <Badge variant="destructive">
+            {t("Ended")}
+          </Badge>
+        ) : (
+          <Badge variant="default" className="space-x-2">
+            <Clock className="w-3 h-3" />
+            <TimeRemaining targetDate={dayJS(initialPoll.endAt)} />
+          </Badge>
+        )}
 
-        <Button
-          onClick={handleVoteSubmit} 
-          disabled={
-            isPending ||
-            selectedOptions.length === 0 ||
-            isLoading ||
-            hasVoted ||
-            isVoteEnded
-          }
-          size={"sm"}
-        >
-          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Soumettre votre vote"}
-        </Button>
+        <div className="flex w-full sm:w-auto space-x-2">
+          <Button
+            onClick={() => router.refresh()}
+            variant="default"
+            size="sm"
+            className="w-full"
+          >
+            <RefreshCcw className="w-4 h-4 mr-2" />
+            {t("Refresh")}
+          </Button>
+
+          <Button
+            onClick={handleVoteSubmit} 
+            disabled={
+              isPending ||
+              selectedOptions.length === 0 ||
+              isLoading ||
+              hasVoted ||
+              isVoteEnded
+            }
+            size="sm"
+            className="w-full"
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("Submit")}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   )

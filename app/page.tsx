@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2, PlusCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { calculateEndDate } from "@/lib/day-js"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 const NewVote = () => {
   const [title, setTitle] = useState("")
@@ -18,9 +19,9 @@ const NewVote = () => {
   const [options, setOptions] = useState(["", ""])
   const [maxChoices, setMaxChoices] = useState("1")
   const [duration, setDuration] = useState("1")
-
   const [isLoading, setIsLoading] = useState(false)
 
+  const t = useTranslations("New")
   const router = useRouter();
 
   const addOption = () => setOptions([...options, ""])
@@ -50,38 +51,49 @@ const NewVote = () => {
   
     if (!response.ok) {
       setIsLoading(false)
-      toast.error("Error creating poll")
+      toast.error(t("Messages.Error"))
       return
     }
 
-    toast.success("Redirection vers le sondage...")
+    toast.success(t("Messages.Success"))
     router.push(`/${(await response.json()).pollId}`)
+  }
+
+  const formatDurationLabel = (days: number): string => {
+    if (days < 1) {
+      const hours = Math.round(days * 24)
+      return t(hours > 1 ? "Form.Duration.Hours" : "Form.Duration.Hour", { number: hours })
+    }
+    return t(days > 1 ? "Form.Duration.Days" : "Form.Duration.Day", { number: days })
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Créer un nouveau vote</CardTitle>
+        <CardTitle>{t("Card.Title")}</CardTitle>
+        <CardDescription>{t("Card.Description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="title">Titre du vote<span className="text-red-500">*</span></Label>
+            <Label htmlFor="title">
+              {t("Form.Title.Label")}<span className="text-red-500">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Entrez le titre du vote"
+              placeholder={t("Form.Title.Placeholder")}
               required
               disabled={isLoading}
             />
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="title">Description du vote</Label>
+            <Label htmlFor="description">{t("Form.Description.Label")}</Label>
             <Textarea
               id="description"
-              placeholder="Entrez la description du vote (optionnel)"
+              placeholder={t("Form.Description.Placeholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={isLoading}
@@ -89,13 +101,15 @@ const NewVote = () => {
           </div>
 
           <div className="space-y-1">
-            <Label>Options de vote<span className="text-red-500">*</span></Label>
+            <Label>
+              {t("Form.Options.Label")}<span className="text-red-500">*</span>
+            </Label>
             {options.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <Input
                   value={option}
                   onChange={(e) => updateOption(index, e.target.value)}
-                  placeholder={`Option ${index + 1}`}
+                  placeholder={t("Form.Options.Placeholder", { number: index + 1 })}
                   required
                   disabled={isLoading}
                 />
@@ -106,24 +120,31 @@ const NewVote = () => {
                     size="icon"
                     onClick={() => removeOption(index)}
                     disabled={isLoading}
+                    aria-label={t("Form.Options.Remove")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={addOption} className="mt-2" disabled={isLoading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={addOption} 
+              className="mt-2" 
+              disabled={isLoading}
+            >
               <PlusCircle className="h-4 w-4 mr-2" />
-              Ajouter une option
+              {t("Form.Options.Add")}
             </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label htmlFor="maxChoices">Nombre maximum de choix</Label>
+              <Label htmlFor="maxChoices">{t("Form.MaxChoices.Label")}</Label>
               <Select value={maxChoices} onValueChange={setMaxChoices} disabled={isLoading}>
                 <SelectTrigger id="maxChoices">
-                  <SelectValue placeholder="Sélectionnez le max" />
+                  <SelectValue placeholder="Select max choices" />
                 </SelectTrigger>
                 <SelectContent>
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -136,18 +157,17 @@ const NewVote = () => {
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="duration">Durée du vote (en jours)<span className="text-red-500">*</span></Label>
+              <Label htmlFor="duration">
+                {t("Form.Duration.Label")}<span className="text-red-500">*</span>
+              </Label>
               <Select value={duration} onValueChange={setDuration} disabled={isLoading}>
                 <SelectTrigger id="duration">
-                  <SelectValue placeholder="Sélectionnez la durée" />
+                  <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
                 <SelectContent>
                   {[0.1, 0.2, 0.5, 0.8, 1, 3, 5, 7, 14, 30].map((days) => (
                     <SelectItem key={days} value={days.toString()}>
-                      {days.toString().startsWith("0.")
-                        ? `${days.toString().slice(2)} heure` + (days === 0.8 ? "s" : "")
-                        : `${days} jour` + (days > 1 ? "s" : "")
-                      }
+                      {formatDurationLabel(days)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -159,8 +179,9 @@ const NewVote = () => {
       <CardFooter>
         <form onSubmit={handleSubmit} className="w-full">
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-            Créer le vote
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : t("Form.Submit")}
           </Button>
         </form>
       </CardFooter>

@@ -1,5 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Component } from "@/lib/types";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 type NotFoundProps = {
@@ -7,19 +8,18 @@ type NotFoundProps = {
 };
 
 const NotFound: Component<NotFoundProps> = ({ pollNotFound = false }) => {
+  const t = useTranslations("NotFound");
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative">
-      <h2 className="text-3xl font-bold">You&apos;re lost?</h2>
+      <h2 className="text-3xl font-bold">{t("Title")}</h2>
 
       <p className="mb-4">
-        {pollNotFound
-          ? "Hmm, we couldn't find the poll you're looking for."
-          : "The page you are looking for does not exist."
-        }
+        {pollNotFound ? t("PollNotFound") : t("PageNotFound")}
       </p>
 
       <Link href="/" className={buttonVariants({ variant: "outline" })}>
-        Go back home
+        {t("BackHome")}
       </Link>
     </div>
   )
