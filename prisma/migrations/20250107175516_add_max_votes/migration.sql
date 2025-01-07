@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Poll" ADD COLUMN     "maxVotes" INTEGER NOT NULL DEFAULT 1;
