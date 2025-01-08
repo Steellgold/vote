@@ -47,7 +47,8 @@
     "Refresh": "Refresh",
     "Votes": "{count} votes",
     "CreatedAt": "This poll was created on {date}",
-    "PieResults": "Poll results"
+    "PieResults": "Poll results",
+    "ViewResults": "View results"
   },
   "NotFound": {
     "Title": "You're lost?",

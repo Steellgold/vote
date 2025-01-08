@@ -47,7 +47,8 @@
     "Refresh": "Rafraîchir",
     "Votes": "{count} votes",
     "CreatedAt": "Ce sondage a été créé le {date}",
-    "PieResults": "Résultats du sondage"
+    "PieResults": "Résultats du sondage",
+    "ViewResults": "Voir les résultats"
   },
   "NotFound": {
     "Title": "Vous êtes perdu ?",

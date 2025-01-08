@@ -190,6 +190,16 @@ export const PollPage: Component<{ poll: Poll }> = ({ poll: initialPoll }) => {
 
           <div className="flex w-full sm:w-auto space-x-2">
             <Button
+              // voter blanc (voir résultat)
+              onClick={() => setHasVoted(true)}
+              variant="default"
+              size="sm"
+              className="w-full"
+            >
+              {t("ViewResults")}
+            </Button>
+
+            <Button
               onClick={() => router.refresh()}
               variant="default"
               size="sm"
